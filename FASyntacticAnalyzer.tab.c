@@ -1452,19 +1452,20 @@ yyreturn:
 
 int estat_valid(int x){
     if( x<num_estats){
-        return (1);
+        return 1;
     }
     else{
-        return (0);
+        return 0;
     }
+}
+yyerror(char *s){
+    fprintf(stderr, "error: %s\n", s);
 }
 
 main(int argc, char **argv){
     yyparse();
     printf ("It's me! Maaariooooooo!!!");
+    return 0;
 }
 
-yyerror(char *s){
-    fprintf(stderr, "error: %s\n", s);
-}
 
