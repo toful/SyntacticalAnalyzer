@@ -8,6 +8,7 @@
     int num_simbols=0;
     char* simbols_alfabet[5];
     int estats_finals[5];
+    extern FILE* yyin;
 
 %}
 
@@ -27,44 +28,44 @@
 
 %%
 
-simbol: simbol COMA simbol | SIMBOL { 
+simbol: simbol COMA simbol | SIMBOL {
     if(simbol_existeix($1))
         printf("[AVIS] El símbol %c ya existeix\n", $1);
     else{
 	simbols_alfabet[num_simbols]=$1;
 	num_simbols++;
     }
-}
+};
 
-alfabet: ALFABET OBRE simbol TANCA | ALFABET OBRIR TANCAR {
+alfabet: ALFABET OBRE simbol TANCA | ALFABET OBRE TANCA {
 	yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
 };
 
-estat_inicial:  ESTAT_INICIAL OBRE NUMERO TANCA {
-    if( /*estat_valid(atoi($3))*/1 )
+estatInicial:  ESTAT_INICIAL OBRE NUMERO TANCA {
+    if( estat_valid(atoi($3)) )
     {
-        //estat_inicial = atoi($3);
+      	estat_inicial = atoi($3);
         printf("El estat inicial és: %s\n", $3);
     } 
     else
     {
-        yyerror("ERROR: estat inicial incorrecte");
+        yyerror("[ERROR]: estat inicial incorrecte\n");
     }
 } | ESTAT_INICIAL OBRE TANCA { 
-    yyperror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n") 
+    yyperror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
 }
 ;
 
-estats_finals: ESTATS_FINALS OBRE num TANCA {
+estatsFinals: ESTATS_FINALS OBRE num TANCA {
     printf("Els estats finals són:");
-    for( i=0 ; i < num_estats_finals)
-	printf("%i", llista_finals)
+    for(int i=0 ; i < num_estats_finals)
+	printf("%i", llista_finals);
 } | ESTATS_FINALS OBRE TANCA {
-    yyerror("[ERROR]: Els autòmats finits han de tenir algún estat final")
+    yyerror("[ERROR]: Els autòmats finits han de tenir algún estat final");
 };
 
 num: num COMA num | NUMERO {
-    if( /*estat_valid(atoi($1))*/1 )
+    if( estat_valid(atoi($1))1 )
     {
         printf("OK!");
     }
@@ -83,10 +84,11 @@ int estat_valid(int x){
     }
 }
 
-int simbol_existeix(char simbol){
-    for( i=0 ; i < num_simbols; i++){
-        if( strcmp(simbols_alfabet[i],simbol) == 0 )
+int simbol_existeix(char *simbol){
+    for(int i=0 ; i < num_simbols; i++){
+        if( strcmp(simbols_alfabet[i],simbol) == 0 ){
 	    return 1;
+	}
     }
     return 0;
 }
@@ -98,8 +100,10 @@ yyerror(char *s){
 }
 
 main(int argc, char **argv){
+    yyin=fopen(argv[1],"r");
     yyparse();
     printf ("It's me! Maaariooooooo!!!");
+	printf("Estat inicial: %i", estat_inicial);
 }
 
 

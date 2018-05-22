@@ -1,5 +1,5 @@
 #!/bin/bash
-
-bison -d FASyntacticAnalyzer.y
 flex FALexicalAnalyzer.l
-cc lex.yy.c FASyntacticAnalyzer.tab.c -lfl
+bison -t -d -v FASyntacticAnalyzer.y
+gcc lex.yy.c FASyntacticAnalyzer.tab.c -lfl
+

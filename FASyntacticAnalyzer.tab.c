@@ -68,10 +68,15 @@
     #include <string.h>
     #include <stdlib.h>
     int num_estats=3;
+    int num_estats_finals=0;
     int estat_inicial;
+    int num_simbols=0;
+    char* simbols_alfabet[5];
+    int estats_finals[5];
+    extern FILE* yyin;
 
 
-#line 75 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
+#line 80 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -95,7 +100,7 @@
 # define YY_YY_FASYNTACTICANALYZER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -137,7 +142,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 141 "FASyntacticAnalyzer.tab.c" /* yacc.c:358  */
+#line 146 "FASyntacticAnalyzer.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -377,18 +382,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  4
+#define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   5
+#define YYLAST   11
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  15
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  2
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  2
+#define YYNRULES  3
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  7
+#define YYNSTATES  6
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -435,7 +440,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    26,    26
+       0,    31,    31,    31
 };
 #endif
 
@@ -446,7 +451,7 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "ALFABET", "ESTATS", "TRANSICIONS",
   "ESTAT_INICIAL", "ESTATS_FINALS", "COMENTARI", "TRANSICIO", "SIMBOL",
-  "COMA", "OBRE", "TANCA", "NUMERO", "$accept", "estat_inicial", YY_NULLPTR
+  "COMA", "OBRE", "TANCA", "NUMERO", "$accept", "simbol", YY_NULLPTR
 };
 #endif
 
@@ -460,10 +465,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -12
+#define YYPACT_NINF -10
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-12)))
+  (!!((Yystate) == (-10)))
 
 #define YYTABLE_NINF -1
 
@@ -474,7 +479,7 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -6,   -11,     2,   -10,   -12,    -8,   -12
+      -9,   -10,     0,   -10,    -9,    -8
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -482,13 +487,13 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     0,     2
+       0,     3,     0,     1,     0,     2
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12
+     -10,    -2
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -502,31 +507,33 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       1,     3,     4,     0,     5,     6
+       3,     1,     5,     4,     0,     0,     0,     0,     0,     0,
+       0,     4
 };
 
 static const yytype_int8 yycheck[] =
 {
-       6,    12,     0,    -1,    14,    13
+       0,    10,     4,    11,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    11
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     6,    16,    12,     0,    14,    13
+       0,    10,    16,     0,    11,    16
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    15,    16
+       0,    15,    16,    16
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     4
+       0,     2,     3,     1
 };
 
 
@@ -1202,24 +1209,21 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 26 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+        case 3:
+#line 31 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
-    if( /*estat_valid(atoi($3))*/1 )
-    {
-        //estat_inicial = atoi($3);
-        printf("El estat inicial és: %s\n", (yyvsp[-1]));
-    } 
-    else
-    {
-        printf("ERROR: estat inicial incorrecte");
+    if(simbol_existeix((yyvsp[0])))
+        printf("[AVIS] El símbol %c ya existeix\n", (yyvsp[0]));
+    else{
+	simbols_alfabet[num_simbols]=(yyvsp[0]);
+	num_simbols++;
     }
 }
-#line 1219 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1223 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1223 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1227 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1447,7 +1451,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 48 "FASyntacticAnalyzer.y" /* yacc.c:1906  */
+#line 76 "FASyntacticAnalyzer.y" /* yacc.c:1906  */
 
 
 int estat_valid(int x){
@@ -1458,14 +1462,27 @@ int estat_valid(int x){
         return 0;
     }
 }
+
+int simbol_existeix(char *simbol){
+    for(int i=0 ; i < num_simbols; i++){
+        if( strcmp(simbols_alfabet[i],simbol) == 0 ){
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+
+
 yyerror(char *s){
     fprintf(stderr, "error: %s\n", s);
 }
 
 main(int argc, char **argv){
+    yyin=fopen(argv[1],"r");
     yyparse();
     printf ("It's me! Maaariooooooo!!!");
-    return 0;
+	printf("Estat inicial: %i", estat_inicial);
 }
 
 
