@@ -11,7 +11,17 @@
     char* simbols_alfabet[10];
     int estats_finals[10];
     
+    char* cadena;
+
     extern FILE* yyin;
+
+
+    int num_estats_valid(int x);
+    int estat_valid(int x);
+    int simbol_existeix(char *simbol);
+    int final_existeix(int estat);
+    void transicio_valida(char* estat_origen, char* symbol, char* estat_desti);
+    int yyerror(char *s);
 
 %}
 
@@ -26,13 +36,13 @@
 %token ESTAT_INICIAL
 %token ESTATS_FINALS
 %token COMENTARI
-%token SIMBOL
-%token NUMERO
+%token <string> NUMERO
+%token <string> SIMBOL
 
 %%
 
-af: alfabet estats transicions inicial finals;
-
+af: alfabet estats transicions inicial finals
+;
 alfabet: ALFABET '{' simbol '}' | ALFABET '{' '}' {
     yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
 };
@@ -63,22 +73,22 @@ transicions: TRANSICIONS '{' llista_transicions '}'
 llista_transicions: transicio | transicio ',' llista_transicions
 ;
 
-transicio: '('NUMERO',' SIMBOL ';'NUMERO')' { transicio_valida($2, $4, $6); }
-| '('NUMERO','NUMERO';'NUMERO')' { transicio_valida($2, $4, $6); }
+transicio: '(' NUMERO ',' SIMBOL ';' NUMERO ')' { transicio_valida($2, $4, $6); }
+| '(' NUMERO ',' NUMERO ';' NUMERO ')' { transicio_valida($2, $4, $6); }
 ;
 
-inicial:  ESTAT_INICIAL '{'NUMERO'}' {
-    if( estat_valid(atoi($4)) )
+inicial: ESTAT_INICIAL '{' NUMERO '}' {
+    if( estat_valid(atoi($3)) )
     {
-      	estat_inicial = atoi($4);
-        printf("L'estat inicial és: %s\n", $4);
+      	estat_inicial = atoi($3);
+        printf("L'estat inicial és: %s\n", $3);
     } 
     else
     {
         yyerror("[ERROR]: estat inicial incorrecte\n");
     }
 } | ESTAT_INICIAL '{' '}' { 
-    yyperror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
+    yyerror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
 } | ESTAT_INICIAL '{' num '}' {
     yyerror("[ERROR]: no pot haver més d'un estat inicial\n");
 }
@@ -147,7 +157,7 @@ int final_existeix(int estat){
     return 0;
 }
 
-void checkTransition(char* estat_origen, char* symbol, char* estat_desti)
+void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 {
     if(!estat_valid(atoi(estat_origen)))
     {
@@ -161,7 +171,7 @@ void checkTransition(char* estat_origen, char* symbol, char* estat_desti)
         sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_desti, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
-    if(!simbol_existeix(symbol, alphabet, nA))
+    if(!simbol_existeix(symbol))
     {
         cadena = malloc(80);
         sprintf(cadena, "[ERROR] El símbol %s de la transició(%s, %s; %s) és desconegut\n", symbol, estat_origen, symbol, estat_desti);
@@ -202,19 +212,18 @@ void checkTransition(char* estat_origen, char* symbol, char* estat_desti)
     }*/
 }
 
-
 int yyerror(char *s){
     fprintf(stderr, "error: %s\n", s);
     exit(1);
 }
 
 int main(int argc, char **argv){
-    yyin=fopen(argv[1],"r");
-    printf ("It's me! Maaariooooooo!!!");
+    if ( argc > 1 )
+        yyin = fopen( argv[1] , "r" );
+    else
+        yyin = stdin;
     yyparse();
     printf ("It's me! Maaariooooooo!!!");
-	printf("Estat inicial: %i", estat_inicial);
-
     return(1);
 }
 

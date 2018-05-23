@@ -783,7 +783,7 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 25 "FALexicalAnalyzer.l"
-{yylval.string = strdup(yytext);	return SIMBOL; }
+{strcpy( yylval.string , yytext );	return SIMBOL; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP

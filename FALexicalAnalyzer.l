@@ -22,7 +22,7 @@ ESPACIOS	({ESPACIO}|{TAB})*
 
 %%
 {alfabeto}			{return ALFABET;}
-{SIMBOLO}			{yylval.string = strdup(yytext);	return SIMBOL; }
+{SIMBOLO}			{strcpy( yylval.string , yytext );	return SIMBOL; }
 {estados}			{return ESTATS;}
 {NUMERO}			{strcpy( yylval.string , yytext );	return NUMERO; }
 {transiciones}		{return TRANSICIONS;}
