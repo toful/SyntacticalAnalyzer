@@ -2,15 +2,22 @@
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
-    int num_estats=3;
-    int num_estats_finals=0;
-    int estat_inicial;
-    int num_simbols=0;
-    char* simbols_alfabet[5];
-    int estats_finals[5];
+    int num_estats = -1;
+    int num_estats_finals = 0;
+
+    int estat_inicial = -1;
+    int num_simbols = 0;
+    
+    char* simbols_alfabet[10];
+    int estats_finals[10];
+    
     extern FILE* yyin;
 
 %}
+
+%union {
+    char string[20];
+};
 
 /* declare tokens */
 %token ALFABET
@@ -19,55 +26,80 @@
 %token ESTAT_INICIAL
 %token ESTATS_FINALS
 %token COMENTARI
-%token TRANSICIO
 %token SIMBOL
-%token COMA
-%token OBRE
-%token TANCA
 %token NUMERO
 
 %%
 
-simbol: simbol COMA simbol | SIMBOL {
-    if(simbol_existeix($1))
-        printf("[AVIS] El símbol %c ya existeix\n", $1);
+af: alfabet estats transicions inicial finals;
+
+alfabet: ALFABET '{' simbol '}' | ALFABET '{' '}' {
+    yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
+};
+
+simbol: simbol ',' simbol | SIMBOL {
+    if( simbol_existeix($1) )
+        printf("[AVIS] El símbol %s ya existeix\n", $1);
     else{
-	simbols_alfabet[num_simbols]=$1;
-	num_simbols++;
+    	strcpy( simbols_alfabet[num_simbols], $1 );
+    	num_simbols++;
     }
 };
 
-alfabet: ALFABET OBRE simbol TANCA | ALFABET OBRE TANCA {
-	yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
+estats: ESTATS '{' NUMERO '}' {
+    if( num_estats_valid( atoi($3) ) ){
+        num_estats = atoi($3);
+        printf("El número d'estats és: %s", $3);
+    }
+    else{
+        yyerror("Error número de estats no vàlids.");
+    }
+} | '{' '}' { yyerror("Error número de estats no vàlids.");
 };
 
-estatInicial:  ESTAT_INICIAL OBRE NUMERO TANCA {
-    if( estat_valid(atoi($3)) )
+transicions: TRANSICIONS '{' llista_transicions '}'
+;
+
+llista_transicions: transicio | transicio ',' llista_transicions
+;
+
+transicio: '('NUMERO',' SIMBOL ';'NUMERO')' { transicio_valida($2, $4, $6); }
+| '('NUMERO','NUMERO';'NUMERO')' { transicio_valida($2, $4, $6); }
+;
+
+inicial:  ESTAT_INICIAL '{'NUMERO'}' {
+    if( estat_valid(atoi($4)) )
     {
-      	estat_inicial = atoi($3);
-        printf("El estat inicial és: %s\n", $3);
+      	estat_inicial = atoi($4);
+        printf("L'estat inicial és: %s\n", $4);
     } 
     else
     {
         yyerror("[ERROR]: estat inicial incorrecte\n");
     }
-} | ESTAT_INICIAL OBRE TANCA { 
+} | ESTAT_INICIAL '{' '}' { 
     yyperror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
+} | ESTAT_INICIAL '{' num '}' {
+    yyerror("[ERROR]: no pot haver més d'un estat inicial\n");
 }
 ;
 
-estatsFinals: ESTATS_FINALS OBRE num TANCA {
+finals: ESTATS_FINALS '{' num '}' {
     printf("Els estats finals són:");
-    for(int i=0 ; i < num_estats_finals)
-	printf("%i", llista_finals);
-} | ESTATS_FINALS OBRE TANCA {
+    for (int i=0 ; i < num_estats_finals; i++)
+	   printf("%i", estats_finals[i]);
+} | ESTATS_FINALS '{' '}' {
     yyerror("[ERROR]: Els autòmats finits han de tenir algún estat final");
-};
+}
+;
 
-num: num COMA num | NUMERO {
-    if( estat_valid(atoi($1))1 )
+num: num ',' num | NUMERO {
+    if( estat_valid(atoi($1)) )
     {
-        printf("OK!");
+        if( !final_existeix( atoi($1) ) ){
+            estats_finals[num_estats_finals] = atoi($1);
+            num_estats_finals ++;
+        }
     }
 }
 ;
@@ -75,8 +107,8 @@ num: num COMA num | NUMERO {
 
 %%
 
-int estat_valid(int x){
-    if( x<num_estats){
+int num_estats_valid(int x){
+    if ( x >= 1 ){
         return 1;
     }
     else{
@@ -84,26 +116,106 @@ int estat_valid(int x){
     }
 }
 
+int estat_valid(int x){
+    if( x < num_estats )
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 int simbol_existeix(char *simbol){
     for(int i=0 ; i < num_simbols; i++){
-        if( strcmp(simbols_alfabet[i],simbol) == 0 ){
-	    return 1;
-	}
+        if( strcmp(simbols_alfabet[i] , simbol) == 0 )
+        {
+	       return 1;
+        }
     }
     return 0;
 }
 
-
-
-yyerror(char *s){
-    fprintf(stderr, "error: %s\n", s);
+int final_existeix(int estat){
+    for(int i=0 ; i < num_estats_finals; i++){
+        if( estats_finals[i]==estat )
+        {
+           return 1;
+        }
+    }
+    return 0;
 }
 
-main(int argc, char **argv){
+void checkTransition(char* estat_origen, char* symbol, char* estat_desti)
+{
+    if(!estat_valid(atoi(estat_origen)))
+    {
+        cadena = malloc(80);
+        sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_origen, estat_origen, symbol, estat_desti);
+        yyerror(cadena);
+    }
+    if(!estat_valid(atoi(estat_desti))) 
+    {
+        cadena = malloc(80);
+        sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_desti, estat_origen, symbol, estat_desti);
+        yyerror(cadena);
+    }
+    if(!simbol_existeix(symbol, alphabet, nA))
+    {
+        cadena = malloc(80);
+        sprintf(cadena, "[ERROR] El símbol %s de la transició(%s, %s; %s) és desconegut\n", symbol, estat_origen, symbol, estat_desti);
+        yyerror(cadena);
+    }
+    /*int pos = transitionExists(estat_origen, estat_desti);
+    if (pos != -1)
+    {
+        if (simbol_existeix(symbol, transitions[pos].symbols, transitions[pos].n))
+        {
+            printf("[AVISO] Transición (%s, %s, %s) repetida.\n", estat_origen, symbol, estat_desti);
+        }
+        else
+        {
+            if(isAFD) printf("[AVISO] Se ha detectado que el AF es no determinista.\n");
+            strcpy(transitions[pos].symbols[transitions[pos].n++], symbol);
+            isAFD = FALSE;
+            addToAFD(estat_origen, symbol, estat_desti); 
+            addToAFI(estat_origen, symbol, estat_desti); 
+        }
+    }
+    else
+    {
+        Transition t;
+        t.n = 1;
+        t.initialState = malloc(256*sizeof(char));
+        t.finalState = malloc(256*sizeof(char));
+        for (int i = 0; i < MAX_ELEMENTS; ++i)
+        {
+            t.symbols[i] = malloc(256*sizeof(char));
+        }
+        strcpy(t.initialState, estat_origen);
+        strcpy(t.symbols[0], symbol);
+        strcpy(t.finalState, estat_desti);
+        transitions[nT++] = t;
+        addToAFD(estat_origen, symbol, estat_desti); 
+        addToAFI(estat_origen, symbol, estat_desti); 
+    }*/
+}
+
+
+int yyerror(char *s){
+    fprintf(stderr, "error: %s\n", s);
+    exit(1);
+}
+
+int main(int argc, char **argv){
     yyin=fopen(argv[1],"r");
+    printf ("It's me! Maaariooooooo!!!");
     yyparse();
     printf ("It's me! Maaariooooooo!!!");
 	printf("Estat inicial: %i", estat_inicial);
+
+    return(1);
 }
 
 
