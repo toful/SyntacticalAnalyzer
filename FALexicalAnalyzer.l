@@ -1,7 +1,7 @@
 %option noyywrap
 %{
 	#include "./FASyntacticAnalyzer.tab.h"
-	int i;
+	int i=0;
 	int estat = 0;
 	int num_estats;
 	int simbol = 0;
@@ -18,19 +18,26 @@ COMENTARIO	"%"
 LINIA		"\n"
 TAB			"\t"
 ESPACIO		" "
+ABRIR		"{"
+CERRAR		"}"
+COMA 		","
 ESPACIOS	({ESPACIO}|{TAB})*
 
 %%
-{alfabeto}			{return ALFABET;}
-{SIMBOLO}			{strcpy( yylval.string , yytext );	return SIMBOL; }
+{alfabeto}			{i++; return ALFABET;}
+{SIMBOLO}			{i++; yylval.string=strdup(yytext); return SIMBOL; }
 {estados}			{return ESTATS;}
-{NUMERO}			{strcpy( yylval.string , yytext );	return NUMERO; }
+{NUMERO}			{yylval.string=strdup(yytext);	return NUMERO; }
 {transiciones}		{return TRANSICIONS;}
 {inicial}			{return ESTAT_INICIAL;}
 {final}				{return ESTATS_FINALS;}
-{COMENTARIO}(.)*{LINIA}		{return COMENTARI;}
+{ABRIR}				{return OBRE;}
+{CERRAR}			{return TANCA;}
+{COMA}				{return COMA;}
+{COMENTARIO}(.)*{LINIA}		{}
 
 
-{ESPACIOS}|LINIA		{}
+{ESPACIOS}			{}
+{LINIA}				{i=i+1;}
 
 %%

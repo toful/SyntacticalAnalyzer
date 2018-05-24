@@ -1,9 +1,12 @@
+%define parse.error verbose
 %{
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
     int num_estats = -1;
     int num_estats_finals = 0;
+
+    extern int i;
 
     int estat_inicial = -1;
     int num_simbols = 0;
@@ -14,23 +17,28 @@
     char* cadena;
 
     extern FILE* yyin;
+    //extern int yylex (void);
+    int yylex();
+    void yyerror(char* s);
 
-
+    int simbol_existeix(char* symbol);
     int num_estats_valid(int x);
     int estat_valid(int x);
-    int simbol_existeix(char *simbol);
     int final_existeix(int estat);
     void transicio_valida(char* estat_origen, char* symbol, char* estat_desti);
-    int yyerror(char *s);
+    
 
 %}
 
 %union {
-    char string[20];
+    char* string;
 };
 
 /* declare tokens */
 %token ALFABET
+%token OBRE
+%token TANCA
+%token COMA
 %token ESTATS
 %token TRANSICIONS
 %token ESTAT_INICIAL
@@ -43,11 +51,14 @@
 
 af: alfabet estats transicions inicial finals
 ;
-alfabet: ALFABET '{' simbol '}' | ALFABET '{' '}' {
+alfabet: ALFABET OBRE simbol TANCA | ALFABET OBRE TANCA {
     yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
 };
 
-simbol: simbol ',' simbol | SIMBOL {
+simbol: SIMBOL COMA simbol | SIMBOL {
+    printf("pene");
+    printf("Llegim -%s-\n", $1);
+    printf("pene");
     if( simbol_existeix($1) )
         printf("[AVIS] El símbol %s ya existeix\n", $1);
     else{
@@ -137,9 +148,10 @@ int estat_valid(int x){
     }
 }
 
-int simbol_existeix(char *simbol){
+int simbol_existeix(char * symbol){
+    printf("pene");
     for(int i=0 ; i < num_simbols; i++){
-        if( strcmp(simbols_alfabet[i] , simbol) == 0 )
+        if( strcmp(simbols_alfabet[i] , symbol) == 0 )
         {
 	       return 1;
         }
@@ -177,43 +189,10 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
         sprintf(cadena, "[ERROR] El símbol %s de la transició(%s, %s; %s) és desconegut\n", symbol, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
-    /*int pos = transitionExists(estat_origen, estat_desti);
-    if (pos != -1)
-    {
-        if (simbol_existeix(symbol, transitions[pos].symbols, transitions[pos].n))
-        {
-            printf("[AVISO] Transición (%s, %s, %s) repetida.\n", estat_origen, symbol, estat_desti);
-        }
-        else
-        {
-            if(isAFD) printf("[AVISO] Se ha detectado que el AF es no determinista.\n");
-            strcpy(transitions[pos].symbols[transitions[pos].n++], symbol);
-            isAFD = FALSE;
-            addToAFD(estat_origen, symbol, estat_desti); 
-            addToAFI(estat_origen, symbol, estat_desti); 
-        }
-    }
-    else
-    {
-        Transition t;
-        t.n = 1;
-        t.initialState = malloc(256*sizeof(char));
-        t.finalState = malloc(256*sizeof(char));
-        for (int i = 0; i < MAX_ELEMENTS; ++i)
-        {
-            t.symbols[i] = malloc(256*sizeof(char));
-        }
-        strcpy(t.initialState, estat_origen);
-        strcpy(t.symbols[0], symbol);
-        strcpy(t.finalState, estat_desti);
-        transitions[nT++] = t;
-        addToAFD(estat_origen, symbol, estat_desti); 
-        addToAFI(estat_origen, symbol, estat_desti); 
-    }*/
 }
 
-int yyerror(char *s){
-    fprintf(stderr, "error: %s\n", s);
+void yyerror(char* s){
+    fprintf(stderr, "%i error: %s\n", i, s);
     exit(1);
 }
 

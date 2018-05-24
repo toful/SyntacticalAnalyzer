@@ -1,5 +1,4 @@
-% Autómata Finito
-Alfabeto { a , b } 
+Alfabeto { a } 
 Estados { 2 } 
 Transiciones { (0 , b ; 0), (0 , a ; 1), (1 , b ; 1), (1 , a ; 0) } 
 Inicial { 0 } 
