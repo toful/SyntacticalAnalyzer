@@ -20,20 +20,26 @@ TAB			"\t"
 ESPACIO		" "
 ABRIR		"{"
 CERRAR		"}"
+ABRIR_P		"("
+CERRAR_P	")"
 COMA 		","
+SEPARADOR	";"
 ESPACIOS	({ESPACIO}|{TAB})*
 
 %%
-{alfabeto}			{i++; return ALFABET;}
-{SIMBOLO}			{i++; yylval.string=strdup(yytext); return SIMBOL; }
+{alfabeto}			{simbol=1;return ALFABET;}
+{SIMBOLO}			{ yylval.stringut=strdup(yytext);if(simbol) return SIMBOL; else return NUMERO;}
 {estados}			{return ESTATS;}
-{NUMERO}			{yylval.string=strdup(yytext);	return NUMERO; }
+{NUMERO}			{ yylval.stringut=strdup(yytext);return NUMERO; }
 {transiciones}		{return TRANSICIONS;}
 {inicial}			{return ESTAT_INICIAL;}
 {final}				{return ESTATS_FINALS;}
 {ABRIR}				{return OBRE;}
-{CERRAR}			{return TANCA;}
+{CERRAR}			{if(simbol) simbol=0; return TANCA;}
 {COMA}				{return COMA;}
+{ABRIR_P}			{return OBRE_P;}
+{CERRAR_P}			{return TANCA_P;}
+{SEPARADOR}			{return SEPARADOR;}
 {COMENTARIO}(.)*{LINIA}		{}
 
 

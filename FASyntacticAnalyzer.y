@@ -6,7 +6,6 @@
     int num_estats = -1;
     int num_estats_finals = 0;
 
-    extern int i;
 
     int estat_inicial = -1;
     int num_simbols = 0;
@@ -19,9 +18,9 @@
     extern FILE* yyin;
     //extern int yylex (void);
     int yylex();
-    void yyerror(char* s);
+    void yyerror(char * s);
 
-    int simbol_existeix(char* symbol);
+    int simbol_existeix(char * symbol);
     int num_estats_valid(int x);
     int estat_valid(int x);
     int final_existeix(int estat);
@@ -31,7 +30,7 @@
 %}
 
 %union {
-    char* string;
+    char *stringut;
 };
 
 /* declare tokens */
@@ -44,21 +43,22 @@
 %token ESTAT_INICIAL
 %token ESTATS_FINALS
 %token COMENTARI
-%token <string> NUMERO
-%token <string> SIMBOL
+%token OBRE_P
+%token TANCA_P
+%token SEPARADOR
+%token <stringut> SIMBOL
+%token <stringut> NUMERO
 
 %%
 
 af: alfabet estats transicions inicial finals
 ;
-alfabet: ALFABET OBRE simbol TANCA | ALFABET OBRE TANCA {
+alfabet : ALFABET OBRE simbol TANCA | ALFABET OBRE TANCA {
     yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
 };
 
-simbol: SIMBOL COMA simbol | SIMBOL {
-    printf("pene");
+simbol : simbol COMA simbol | SIMBOL {
     printf("Llegim -%s-\n", $1);
-    printf("pene");
     if( simbol_existeix($1) )
         printf("[AVIS] El símbol %s ya existeix\n", $1);
     else{
@@ -67,28 +67,28 @@ simbol: SIMBOL COMA simbol | SIMBOL {
     }
 };
 
-estats: ESTATS '{' NUMERO '}' {
+estats: ESTATS OBRE NUMERO TANCA {
     if( num_estats_valid( atoi($3) ) ){
         num_estats = atoi($3);
-        printf("El número d'estats és: %s", $3);
+        printf("El número d'estats és: %s\n", $3);
     }
     else{
         yyerror("Error número de estats no vàlids.");
     }
-} | '{' '}' { yyerror("Error número de estats no vàlids.");
+} | OBRE TANCA { yyerror("Error número de estats no vàlids.");
 };
 
-transicions: TRANSICIONS '{' llista_transicions '}'
+transicions: TRANSICIONS OBRE llista_transicions TANCA
 ;
 
-llista_transicions: transicio | transicio ',' llista_transicions
+llista_transicions: transicio | transicio COMA llista_transicions
 ;
 
-transicio: '(' NUMERO ',' SIMBOL ';' NUMERO ')' { transicio_valida($2, $4, $6); }
-| '(' NUMERO ',' NUMERO ';' NUMERO ')' { transicio_valida($2, $4, $6); }
+transicio: OBRE_P NUMERO COMA SIMBOL SEPARADOR NUMERO TANCA_P { transicio_valida($2, $4, $6); }
+| OBRE_P NUMERO COMA NUMERO SEPARADOR NUMERO TANCA_P { transicio_valida($2, $4, $6); }
 ;
 
-inicial: ESTAT_INICIAL '{' NUMERO '}' {
+inicial: ESTAT_INICIAL OBRE NUMERO TANCA {
     if( estat_valid(atoi($3)) )
     {
       	estat_inicial = atoi($3);
@@ -98,23 +98,25 @@ inicial: ESTAT_INICIAL '{' NUMERO '}' {
     {
         yyerror("[ERROR]: estat inicial incorrecte\n");
     }
-} | ESTAT_INICIAL '{' '}' { 
+} | ESTAT_INICIAL OBRE TANCA { 
     yyerror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
-} | ESTAT_INICIAL '{' num '}' {
+} | ESTAT_INICIAL OBRE num TANCA {
     yyerror("[ERROR]: no pot haver més d'un estat inicial\n");
 }
 ;
 
-finals: ESTATS_FINALS '{' num '}' {
+finals: ESTATS_FINALS OBRE num TANCA {
     printf("Els estats finals són:");
-    for (int i=0 ; i < num_estats_finals; i++)
+    for (int i=0 ; i < num_estats_finals; i++){
 	   printf("%i", estats_finals[i]);
+    }
+    printf("\n");
 } | ESTATS_FINALS '{' '}' {
     yyerror("[ERROR]: Els autòmats finits han de tenir algún estat final");
 }
 ;
 
-num: num ',' num | NUMERO {
+num: num COMA num | NUMERO {
     if( estat_valid(atoi($1)) )
     {
         if( !final_existeix( atoi($1) ) ){
@@ -148,8 +150,7 @@ int estat_valid(int x){
     }
 }
 
-int simbol_existeix(char * symbol){
-    printf("pene");
+int simbol_existeix(char* symbol){
     for(int i=0 ; i < num_simbols; i++){
         if( strcmp(simbols_alfabet[i] , symbol) == 0 )
         {
@@ -191,18 +192,27 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
     }
 }
 
-void yyerror(char* s){
-    fprintf(stderr, "%i error: %s\n", i, s);
+void start()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        simbols_alfabet[i] = malloc(256*sizeof(char));
+    }
+}
+
+void yyerror(char * s){
+    fprintf(stderr, "Error: %s\n",  s);
     exit(1);
 }
 
 int main(int argc, char **argv){
+    start();
     if ( argc > 1 )
         yyin = fopen( argv[1] , "r" );
     else
         yyin = stdin;
     yyparse();
-    printf ("It's me! Maaariooooooo!!!");
+    printf ("It's me! Maaariooooooo!!!\n");
     return(1);
 }
 
