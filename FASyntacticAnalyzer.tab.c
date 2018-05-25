@@ -107,7 +107,7 @@
     int existeixTransicio(char* estat_origen, char* estat_desti);
     void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti);
     void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti);
-    
+    int simbol_existeix_transicio(char* symbol, int pos);
 
 
 #line 114 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
@@ -1692,7 +1692,7 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 
     if (pos != -1)
     {
-        if (simbol_existeix(symbol))
+        if (simbol_existeix_transicio(symbol, pos))
         {
             printf("[AVIS] Transició (%s, %s, %s) repetida.\n", estat_origen, symbol, estat_desti);
         }
@@ -1724,6 +1724,16 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
     }
 }
 
+int simbol_existeix_transicio(char* symbol, int pos){
+    for(int i=0 ; i < transicions[pos].num_transicions; i++){
+        if( strcmp(transicions[pos].simbols_alfabet[i] , symbol) == 0 )
+        {
+           return 1;
+        }
+    }
+    return 0;
+}
+
 void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti)
 {
     cadena = malloc(strlen(codi_afd)+70);
@@ -1740,9 +1750,20 @@ void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti)
 
 void acabar_codi()
 {
-    cadena = malloc(strlen(codi_afd)+20);
-    sprintf(cadena, "%s\treturn proxim_estat;\n}\n", codi_afd);
-    codi_afd = cadena;
+    if (afd)
+    {
+        cadena = malloc(strlen(codi_afd)+20);
+        sprintf(cadena, "%s\treturn proxim_estat;\n}\n", codi_afd);
+        codi_afd = cadena;
+    }
+    else
+    {
+        cadena = malloc(strlen(codi_afn)+50);
+        sprintf(cadena, "%s\treturn proxim_estat;\n}\n", codi_afn);
+        codi_afn = cadena;
+    }
+    
+    
 }
 
 int existeixTransicio(char* estat_origen, char* estat_desti)
@@ -1786,7 +1807,11 @@ int main(int argc, char **argv){
         printf(", %i", estats_finals[i]);
     }
 
-    printf ("\n%s", codi_afd);
+    
+    if (afd)
+        printf ("\n\n%s", codi_afd);
+    else
+        printf ("\n\n%s", codi_afn);
 
     //creem la llibreria
     FILE* llibreria = fopen("af.h", "wa");

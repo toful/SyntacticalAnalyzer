@@ -1,1 +1,1 @@
-int transicion (int estado, char simbolo);
+int * transicion (int estado, char simbolo);
