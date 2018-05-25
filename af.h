@@ -1,0 +1,1 @@
+int transicion (int estado, char simbolo);
