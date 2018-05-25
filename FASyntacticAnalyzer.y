@@ -43,6 +43,7 @@
     int existeixTransicio(char* estat_origen, char* estat_desti);
     void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti);
     void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti);
+    int transicio_repetida(char* symbol, char* llista[], int numero_trans);
     
 
 %}
@@ -179,23 +180,34 @@ int final_existeix(int estat){
     return 0;
 }
 
+int transicio_repetida(char * symbol, char* llista[], int numero_trans){
+    for (int i = 0; i < numero_trans; i++)
+    {
+        if (strcmp(llista[i],symbol) == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 {
     if(!estat_valid(atoi(estat_origen)))
     {
-        cadena = malloc(80);
+        cadena = malloc(100);
         sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_origen, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
     if(!estat_valid(atoi(estat_desti))) 
     {
-        cadena = malloc(80);
+        cadena = malloc(100);
         sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_desti, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
     if(!simbol_existeix(symbol))
     {
-        cadena = malloc(80);
+        cadena = malloc(100);
         sprintf(cadena, "[ERROR] El símbol %s de la transició(%s, %s; %s) és desconegut\n", symbol, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
@@ -204,7 +216,9 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 
     if (pos != -1)
     {
-        if (simbol_existeix(symbol))
+        int mec=simbol_existeix(symbol);
+        printf("mec: %i", mec);
+        if (transicio_repetida(symbol, transicions[pos].simbols_alfabet, transicions[pos].num_transicions))
         {
             printf("[AVIS] Transició (%s, %s, %s) repetida.\n", estat_origen, symbol, estat_desti);
         }
@@ -221,11 +235,11 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
     {
         Transicio temp;
         temp.num_transicions = 1;
-        temp.estat_inicial = malloc(16*sizeof(char));
-        temp.estats_finals = malloc(16*sizeof(char));
+        temp.estat_inicial = malloc(32*sizeof(char));
+        temp.estats_finals = malloc(32*sizeof(char));
         for (int i = 0; i < 10; ++i)
         {
-            temp.simbols_alfabet[i] = malloc(16*sizeof(char));
+            temp.simbols_alfabet[i] = malloc(32*sizeof(char));
         }
         strcpy(temp.estat_inicial, estat_origen);
         strcpy(temp.simbols_alfabet[0], symbol);
@@ -238,21 +252,21 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 
 void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti)
 {
-    cadena = malloc(strlen(codi_afd)+70);
+    cadena = malloc(strlen(codi_afd)+100);
     sprintf(cadena, "%s\tif ( (estat == %s) && (simbol == \'%s\') ) proxim_estat = %s;\n", codi_afd, estat_origen, symbol, estat_desti);
     codi_afd = cadena;
 }
 
 void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti)
 {
-    cadena = malloc(strlen(codi_afn)+80);
+    cadena = malloc(strlen(codi_afn)+110);
     sprintf(cadena, "%s\tif ( (estat == %s) && (simbol == \'%s\') ) proxim_estat[n++] = %s;\n", codi_afn, estat_origen, symbol, estat_desti);
     codi_afn = cadena;
 }
 
 void acabar_codi()
 {
-    cadena = malloc(strlen(codi_afd)+20);
+    cadena = malloc(strlen(codi_afd)+30);
     sprintf(cadena, "%s\treturn proxim_estat;\n}\n", codi_afd);
     codi_afd = cadena;
 }
@@ -273,7 +287,7 @@ void start()
 {
     for (int i = 0; i < 10; i++)
     {
-        simbols_alfabet[i] = malloc(16*sizeof(char));
+        simbols_alfabet[i] = malloc(32*sizeof(char));
     }
 }
 

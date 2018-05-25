@@ -67,7 +67,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 50 "FASyntacticAnalyzer.y" /* yacc.c:1909  */
+#line 51 "FASyntacticAnalyzer.y" /* yacc.c:1909  */
 
     char *stringut;
 

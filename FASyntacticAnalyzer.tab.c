@@ -107,10 +107,11 @@
     int existeixTransicio(char* estat_origen, char* estat_desti);
     void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti);
     void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti);
+    int transicio_repetida(char* symbol, char* llista[], int numero_trans);
     
 
 
-#line 114 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
+#line 115 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -167,11 +168,11 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 50 "FASyntacticAnalyzer.y" /* yacc.c:355  */
+#line 51 "FASyntacticAnalyzer.y" /* yacc.c:355  */
 
     char *stringut;
 
-#line 175 "FASyntacticAnalyzer.tab.c" /* yacc.c:355  */
+#line 176 "FASyntacticAnalyzer.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -188,7 +189,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 192 "FASyntacticAnalyzer.tab.c" /* yacc.c:358  */
+#line 193 "FASyntacticAnalyzer.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -487,9 +488,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    72,    72,    74,    74,    78,    78,    87,    94,    97,
-     100,   100,   103,   104,   107,   116,   118,   123,   123,   128,
-     128
+       0,    73,    73,    75,    75,    79,    79,    88,    95,    98,
+     101,   101,   104,   105,   108,   117,   119,   124,   124,   129,
+     129
 };
 #endif
 
@@ -1290,15 +1291,15 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 74 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 75 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
 }
-#line 1298 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1299 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 78 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 79 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     if( simbol_existeix((yyvsp[0].stringut)) )
         printf("[AVIS] El símbol %s ya existeix\n", (yyvsp[0].stringut));
@@ -1307,11 +1308,11 @@ yyreduce:
     	num_simbols++;
     }
 }
-#line 1311 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1312 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 87 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 88 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     if( num_estats_valid( atoi((yyvsp[-1].stringut)) ) ){
         num_estats = atoi((yyvsp[-1].stringut));
@@ -1320,30 +1321,30 @@ yyreduce:
         yyerror("Error número de estats no vàlids.");
     }
 }
-#line 1324 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1325 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 94 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 95 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     { yyerror("Error número de estats no vàlids.");
 }
-#line 1331 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1332 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 103 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 104 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     { transicio_valida((yyvsp[-5].stringut), (yyvsp[-3].stringut), (yyvsp[-1].stringut)); }
-#line 1337 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1338 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 104 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 105 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     { transicio_valida((yyvsp[-5].stringut), (yyvsp[-3].stringut), (yyvsp[-1].stringut)); }
-#line 1343 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1344 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 107 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 108 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     if( estat_valid(atoi((yyvsp[-1].stringut))) )
     {
@@ -1354,35 +1355,35 @@ yyreduce:
         yyerror("[ERROR]: estat inicial incorrecte\n");
     }
 }
-#line 1358 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1359 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 116 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 117 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     { 
     yyerror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
 }
-#line 1366 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1367 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 118 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 119 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     yyerror("[ERROR]: no pot haver més d'un estat inicial\n");
 }
-#line 1374 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1375 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 123 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 124 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     yyerror("[ERROR]: Els autòmats finits han de tenir algún estat final");
 }
-#line 1382 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1383 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 128 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+#line 129 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
     if( estat_valid(atoi((yyvsp[0].stringut))) )
     {
@@ -1392,11 +1393,11 @@ yyreduce:
         }
     }
 }
-#line 1396 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1397 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1400 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1401 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1624,7 +1625,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 140 "FASyntacticAnalyzer.y" /* yacc.c:1906  */
+#line 141 "FASyntacticAnalyzer.y" /* yacc.c:1906  */
 
 
 int num_estats_valid(int x){
@@ -1667,23 +1668,34 @@ int final_existeix(int estat){
     return 0;
 }
 
+int transicio_repetida(char * symbol, char* llista[], int numero_trans){
+    for (int i = 0; i < numero_trans; i++)
+    {
+        if (strcmp(llista[i],symbol) == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 {
     if(!estat_valid(atoi(estat_origen)))
     {
-        cadena = malloc(80);
+        cadena = malloc(100);
         sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_origen, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
     if(!estat_valid(atoi(estat_desti))) 
     {
-        cadena = malloc(80);
+        cadena = malloc(100);
         sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_desti, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
     if(!simbol_existeix(symbol))
     {
-        cadena = malloc(80);
+        cadena = malloc(100);
         sprintf(cadena, "[ERROR] El símbol %s de la transició(%s, %s; %s) és desconegut\n", symbol, estat_origen, symbol, estat_desti);
         yyerror(cadena);
     }
@@ -1692,7 +1704,9 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 
     if (pos != -1)
     {
-        if (simbol_existeix(symbol))
+        int mec=simbol_existeix(symbol);
+        printf("mec: %i", mec);
+        if (transicio_repetida(symbol, transicions[pos].simbols_alfabet, transicions[pos].num_transicions))
         {
             printf("[AVIS] Transició (%s, %s, %s) repetida.\n", estat_origen, symbol, estat_desti);
         }
@@ -1709,11 +1723,11 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
     {
         Transicio temp;
         temp.num_transicions = 1;
-        temp.estat_inicial = malloc(16*sizeof(char));
-        temp.estats_finals = malloc(16*sizeof(char));
+        temp.estat_inicial = malloc(32*sizeof(char));
+        temp.estats_finals = malloc(32*sizeof(char));
         for (int i = 0; i < 10; ++i)
         {
-            temp.simbols_alfabet[i] = malloc(16*sizeof(char));
+            temp.simbols_alfabet[i] = malloc(32*sizeof(char));
         }
         strcpy(temp.estat_inicial, estat_origen);
         strcpy(temp.simbols_alfabet[0], symbol);
@@ -1726,21 +1740,21 @@ void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
 
 void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti)
 {
-    cadena = malloc(strlen(codi_afd)+70);
+    cadena = malloc(strlen(codi_afd)+100);
     sprintf(cadena, "%s\tif ( (estat == %s) && (simbol == \'%s\') ) proxim_estat = %s;\n", codi_afd, estat_origen, symbol, estat_desti);
     codi_afd = cadena;
 }
 
 void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti)
 {
-    cadena = malloc(strlen(codi_afn)+80);
+    cadena = malloc(strlen(codi_afn)+110);
     sprintf(cadena, "%s\tif ( (estat == %s) && (simbol == \'%s\') ) proxim_estat[n++] = %s;\n", codi_afn, estat_origen, symbol, estat_desti);
     codi_afn = cadena;
 }
 
 void acabar_codi()
 {
-    cadena = malloc(strlen(codi_afd)+20);
+    cadena = malloc(strlen(codi_afd)+30);
     sprintf(cadena, "%s\treturn proxim_estat;\n}\n", codi_afd);
     codi_afd = cadena;
 }
@@ -1761,7 +1775,7 @@ void start()
 {
     for (int i = 0; i < 10; i++)
     {
-        simbols_alfabet[i] = malloc(16*sizeof(char));
+        simbols_alfabet[i] = malloc(32*sizeof(char));
     }
 }
 
@@ -1786,7 +1800,7 @@ int main(int argc, char **argv){
         printf(", %i", estats_finals[i]);
     }
 
-    printf ("\n%s", codi_afd);
+    printf ("\n\n%s", codi_afd);
 
     //creem la llibreria
     FILE* llibreria = fopen("af.h", "wa");
