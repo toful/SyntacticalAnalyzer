@@ -62,16 +62,55 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "FASyntacticAnalyzer.y" /* yacc.c:339  */
+#line 2 "FASyntacticAnalyzer.y" /* yacc.c:339  */
 
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
-    int num_estats=3;
-    int estat_inicial;
+    int num_estats = -1;
+    int num_estats_finals = 0;
 
 
-#line 75 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
+    int estat_inicial = -1;
+    int num_simbols = 0;
+    
+    char* simbols_alfabet[10];
+    int estats_finals[10];
+    
+    char* cadena;
+
+    typedef struct Transicio
+    {
+        char* estat_inicial;
+        char* estats_finals;
+        char* simbols_alfabet[10];
+        int num_transicions;
+    }Transicio;
+    Transicio transicions[10*10];
+
+    int num_transicions=0;
+
+    char* codi_afd = "int transicio ( int estat, char simbol ) {\n\tint proxim_estat;\n";
+    char* codi_afn = "int * transicio ( int estat, char simbol ) {\n\tstatic int proxim_estat[NUM_ESTATS+1], n=0;\n";
+    int afd = 1;
+
+    extern FILE* yyin;
+    //extern int yylex (void);
+    int yylex();
+    void yyerror(char * s);
+
+    int simbol_existeix(char * symbol);
+    int num_estats_valid(int x);
+    int estat_valid(int x);
+    int final_existeix(int estat);
+    void transicio_valida(char* estat_origen, char* symbol, char* estat_desti);
+    int existeixTransicio(char* estat_origen, char* estat_desti);
+    void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti);
+    void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti);
+    
+
+
+#line 114 "FASyntacticAnalyzer.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -86,7 +125,7 @@
 # undef YYERROR_VERBOSE
 # define YYERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 0
+# define YYERROR_VERBOSE 1
 #endif
 
 /* In a future release of Bison, this section will be replaced
@@ -95,7 +134,7 @@
 # define YY_YY_FASYNTACTICANALYZER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -107,23 +146,35 @@ extern int yydebug;
   enum yytokentype
   {
     ALFABET = 258,
-    ESTATS = 259,
-    TRANSICIONS = 260,
-    ESTAT_INICIAL = 261,
-    ESTATS_FINALS = 262,
-    COMENTARI = 263,
-    TRANSICIO = 264,
-    SIMBOL = 265,
-    COMA = 266,
-    OBRE = 267,
-    TANCA = 268,
-    NUMERO = 269
+    OBRE = 259,
+    TANCA = 260,
+    COMA = 261,
+    ESTATS = 262,
+    TRANSICIONS = 263,
+    ESTAT_INICIAL = 264,
+    ESTATS_FINALS = 265,
+    COMENTARI = 266,
+    OBRE_P = 267,
+    TANCA_P = 268,
+    SEPARADOR = 269,
+    SIMBOL = 270,
+    NUMERO = 271
   };
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 50 "FASyntacticAnalyzer.y" /* yacc.c:355  */
+
+    char *stringut;
+
+#line 175 "FASyntacticAnalyzer.tab.c" /* yacc.c:355  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -137,7 +188,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 141 "FASyntacticAnalyzer.tab.c" /* yacc.c:358  */
+#line 192 "FASyntacticAnalyzer.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -377,23 +428,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  4
+#define YYFINAL  5
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   5
+#define YYLAST   56
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  15
+#define YYNTOKENS  19
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  2
+#define YYNNTS  11
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  2
+#define YYNRULES  20
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  7
+#define YYNSTATES  56
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   269
+#define YYMAXUTOK   271
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -414,7 +465,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,    17,     2,    18,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -428,25 +479,30 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    26,    26
+       0,    72,    72,    74,    74,    78,    78,    87,    94,    97,
+     100,   100,   103,   104,   107,   116,   118,   123,   123,   128,
+     128
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+#if YYDEBUG || YYERROR_VERBOSE || 1
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "ALFABET", "ESTATS", "TRANSICIONS",
-  "ESTAT_INICIAL", "ESTATS_FINALS", "COMENTARI", "TRANSICIO", "SIMBOL",
-  "COMA", "OBRE", "TANCA", "NUMERO", "$accept", "estat_inicial", YY_NULLPTR
+  "$end", "error", "$undefined", "ALFABET", "OBRE", "TANCA", "COMA",
+  "ESTATS", "TRANSICIONS", "ESTAT_INICIAL", "ESTATS_FINALS", "COMENTARI",
+  "OBRE_P", "TANCA_P", "SEPARADOR", "SIMBOL", "NUMERO", "'{'", "'}'",
+  "$accept", "af", "alfabet", "simbol", "estats", "transicions",
+  "llista_transicions", "transicio", "inicial", "finals", "num", YY_NULLPTR
 };
 #endif
 
@@ -456,14 +512,14 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269
+     265,   266,   267,   268,   269,   270,   271,   123,   125
 };
 # endif
 
-#define YYPACT_NINF -12
+#define YYPACT_NINF -36
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-12)))
+  (!!((Yystate) == (-36)))
 
 #define YYTABLE_NINF -1
 
@@ -474,7 +530,12 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -6,   -11,     2,   -10,   -12,    -8,   -12
+       3,     0,    11,     1,    -3,   -36,    16,    18,    15,   -36,
+     -36,     4,   -36,     8,    21,    17,   -36,    12,    23,    19,
+      25,    20,    26,   -36,    22,    28,    29,    -2,    -4,   -36,
+      30,   -36,    19,   -36,    32,    10,    24,    27,     2,   -36,
+     -36,   -36,    24,   -36,    14,   -36,    33,    34,    35,   -36,
+      36,    37,    31,    38,   -36,   -36
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -482,19 +543,26 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     0,     2
+       0,     0,     0,     0,     0,     1,     0,     0,     0,     4,
+       6,     0,     8,     0,     0,     0,     3,     0,     0,     0,
+       0,     0,     5,     7,     0,     0,    10,     0,     0,     2,
+       0,     9,     0,    15,    20,     0,     0,     0,     0,    11,
+      14,    16,     0,    20,     0,    18,     0,     0,    19,    17,
+       0,     0,     0,     0,    12,    13
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12
+     -36,   -36,   -36,    39,   -36,   -36,     7,   -36,   -36,   -36,
+     -35
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2
+      -1,     2,     3,    11,     8,    15,    25,    26,    21,    29,
+      35
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -502,31 +570,50 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       1,     3,     4,     0,     5,     6
+      36,    44,     9,    33,     4,     6,     1,    48,     7,    16,
+      17,     5,    10,    37,    34,    41,    42,    46,    47,    49,
+      42,    12,    13,    14,    18,    19,    20,    10,    23,    27,
+      28,    24,    17,    31,     0,    32,    38,    40,    30,    39,
+      43,    42,     0,     0,    54,    45,     0,    50,    51,     0,
+       0,    55,    52,    53,     0,     0,    22
 };
 
 static const yytype_int8 yycheck[] =
 {
-       6,    12,     0,    -1,    14,    13
+       4,    36,     5,     5,     4,     4,     3,    42,     7,     5,
+       6,     0,    15,    17,    16,     5,     6,    15,    16,     5,
+       6,     5,     4,     8,    16,     4,     9,    15,     5,     4,
+      10,    12,     6,     5,    -1,     6,     6,     5,    16,    32,
+      16,     6,    -1,    -1,    13,    18,    -1,    14,    14,    -1,
+      -1,    13,    16,    16,    -1,    -1,    17
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     6,    16,    12,     0,    14,    13
+       0,     3,    20,    21,     4,     0,     4,     7,    23,     5,
+      15,    22,     5,     4,     8,    24,     5,     6,    16,     4,
+       9,    27,    22,     5,    12,    25,    26,     4,    10,    28,
+      16,     5,     6,     5,    16,    29,     4,    17,     6,    25,
+       5,     5,     6,    16,    29,    18,    15,    16,    29,     5,
+      14,    14,    16,    16,    13,    13
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    15,    16
+       0,    19,    20,    21,    21,    22,    22,    23,    23,    24,
+      25,    25,    26,    26,    27,    27,    27,    28,    28,    29,
+      29
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     4
+       0,     2,     5,     4,     3,     3,     1,     4,     2,     4,
+       1,     3,     7,     7,     4,     3,     4,     4,     3,     3,
+       1
 };
 
 
@@ -1202,24 +1289,114 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 26 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+        case 4:
+#line 74 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
-    if( /*estat_valid(atoi($3))*/1 )
+    yyerror("[ERROR]: L'alfabet ha de contindre un o més símbols\n");
+}
+#line 1298 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 6:
+#line 78 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
     {
-        //estat_inicial = atoi($3);
-        printf("El estat inicial és: %s\n", (yyvsp[-1]));
+    if( simbol_existeix((yyvsp[0].stringut)) )
+        printf("[AVIS] El símbol %s ya existeix\n", (yyvsp[0].stringut));
+    else{
+    	strcpy( simbols_alfabet[num_simbols], (yyvsp[0].stringut) );
+    	num_simbols++;
+    }
+}
+#line 1311 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 7:
+#line 87 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    {
+    if( num_estats_valid( atoi((yyvsp[-1].stringut)) ) ){
+        num_estats = atoi((yyvsp[-1].stringut));
+    }
+    else{
+        yyerror("Error número de estats no vàlids.");
+    }
+}
+#line 1324 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 8:
+#line 94 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    { yyerror("Error número de estats no vàlids.");
+}
+#line 1331 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 12:
+#line 103 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    { transicio_valida((yyvsp[-5].stringut), (yyvsp[-3].stringut), (yyvsp[-1].stringut)); }
+#line 1337 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 13:
+#line 104 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    { transicio_valida((yyvsp[-5].stringut), (yyvsp[-3].stringut), (yyvsp[-1].stringut)); }
+#line 1343 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 14:
+#line 107 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    {
+    if( estat_valid(atoi((yyvsp[-1].stringut))) )
+    {
+      	estat_inicial = atoi((yyvsp[-1].stringut));
     } 
     else
     {
-        printf("ERROR: estat inicial incorrecte");
+        yyerror("[ERROR]: estat inicial incorrecte\n");
     }
 }
-#line 1219 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1358 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 116 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    { 
+    yyerror("[ERROR]: Els autòmats finits han de tenir un estat inicial\n");
+}
+#line 1366 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 118 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    {
+    yyerror("[ERROR]: no pot haver més d'un estat inicial\n");
+}
+#line 1374 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 18:
+#line 123 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    {
+    yyerror("[ERROR]: Els autòmats finits han de tenir algún estat final");
+}
+#line 1382 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 128 "FASyntacticAnalyzer.y" /* yacc.c:1646  */
+    {
+    if( estat_valid(atoi((yyvsp[0].stringut))) )
+    {
+        if( !final_existeix( atoi((yyvsp[0].stringut)) ) ){
+            estats_finals[num_estats_finals] = atoi((yyvsp[0].stringut));
+            num_estats_finals ++;
+        }
+    }
+}
+#line 1396 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1223 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
+#line 1400 "FASyntacticAnalyzer.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1447,24 +1624,186 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 48 "FASyntacticAnalyzer.y" /* yacc.c:1906  */
+#line 140 "FASyntacticAnalyzer.y" /* yacc.c:1906  */
 
 
-int estat_valid(int x){
-    if( x<num_estats){
-        return (1);
+int num_estats_valid(int x){
+    if ( x >= 1 ){
+        return 1;
     }
     else{
-        return (0);
+        return 0;
     }
 }
 
-main(int argc, char **argv){
-    yyparse();
-    printf ("It's me! Maaariooooooo!!!");
+int estat_valid(int x){
+    if( x < num_estats )
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-yyerror(char *s){
-    fprintf(stderr, "error: %s\n", s);
+int simbol_existeix(char* symbol){
+    for(int i=0 ; i < num_simbols; i++){
+        if( strcmp(simbols_alfabet[i] , symbol) == 0 )
+        {
+	       return 1;
+        }
+    }
+    return 0;
 }
+
+int final_existeix(int estat){
+    for(int i=0 ; i < num_estats_finals; i++){
+        if( estats_finals[i]==estat )
+        {
+           return 1;
+        }
+    }
+    return 0;
+}
+
+void transicio_valida(char* estat_origen, char* symbol, char* estat_desti)
+{
+    if(!estat_valid(atoi(estat_origen)))
+    {
+        cadena = malloc(80);
+        sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_origen, estat_origen, symbol, estat_desti);
+        yyerror(cadena);
+    }
+    if(!estat_valid(atoi(estat_desti))) 
+    {
+        cadena = malloc(80);
+        sprintf(cadena, "[ERROR] El estat %s de la transició(%s, %s; %s) és desconegut\n", estat_desti, estat_origen, symbol, estat_desti);
+        yyerror(cadena);
+    }
+    if(!simbol_existeix(symbol))
+    {
+        cadena = malloc(80);
+        sprintf(cadena, "[ERROR] El símbol %s de la transició(%s, %s; %s) és desconegut\n", symbol, estat_origen, symbol, estat_desti);
+        yyerror(cadena);
+    }
+
+    int pos = existeixTransicio(estat_origen, estat_desti);
+
+    if (pos != -1)
+    {
+        if (simbol_existeix(symbol))
+        {
+            printf("[AVIS] Transició (%s, %s, %s) repetida.\n", estat_origen, symbol, estat_desti);
+        }
+        else
+        {
+            if(afd) printf("[AVIS] S'ha detectat que el AF és no determinista.\n");
+            strcpy(transicions[pos].simbols_alfabet[transicions[pos].num_transicions++], symbol);
+            afd = 0;
+            afegeix_trans_AFD(estat_origen, symbol, estat_desti); 
+            afegeix_trans_AFN(estat_origen, symbol, estat_desti); 
+        }
+    }
+    else
+    {
+        Transicio temp;
+        temp.num_transicions = 1;
+        temp.estat_inicial = malloc(16*sizeof(char));
+        temp.estats_finals = malloc(16*sizeof(char));
+        for (int i = 0; i < 10; ++i)
+        {
+            temp.simbols_alfabet[i] = malloc(16*sizeof(char));
+        }
+        strcpy(temp.estat_inicial, estat_origen);
+        strcpy(temp.simbols_alfabet[0], symbol);
+        strcpy(temp.estats_finals, estat_desti);
+        transicions[num_transicions++] = temp;
+        afegeix_trans_AFD(estat_origen, symbol, estat_desti); 
+        afegeix_trans_AFN(estat_origen, symbol, estat_desti); 
+    }
+}
+
+void afegeix_trans_AFD(char* estat_origen, char* symbol, char* estat_desti)
+{
+    cadena = malloc(strlen(codi_afd)+70);
+    sprintf(cadena, "%s\tif ( (estat == %s) && (simbol == \'%s\') ) proxim_estat = %s;\n", codi_afd, estat_origen, symbol, estat_desti);
+    codi_afd = cadena;
+}
+
+void afegeix_trans_AFN(char* estat_origen, char* symbol, char* estat_desti)
+{
+    cadena = malloc(strlen(codi_afn)+80);
+    sprintf(cadena, "%s\tif ( (estat == %s) && (simbol == \'%s\') ) proxim_estat[n++] = %s;\n", codi_afn, estat_origen, symbol, estat_desti);
+    codi_afn = cadena;
+}
+
+void acabar_codi()
+{
+    cadena = malloc(strlen(codi_afd)+20);
+    sprintf(cadena, "%s\treturn proxim_estat;\n}\n", codi_afd);
+    codi_afd = cadena;
+}
+
+int existeixTransicio(char* estat_origen, char* estat_desti)
+{
+    for (int i = 0; i < num_transicions; i++)
+    {
+        if ((strcmp(transicions[i].estat_inicial, estat_origen) == 0) && (strcmp(transicions[i].estats_finals, estat_desti) == 0))
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void start()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        simbols_alfabet[i] = malloc(16*sizeof(char));
+    }
+}
+
+void yyerror(char * s){
+    fprintf(stderr, "Error: %s\n",  s);
+    exit(1);
+}
+
+int main(int argc, char **argv){
+    start();
+    if ( argc > 1 )
+        yyin = fopen( argv[1] , "r" );
+    else
+        yyin = stdin;
+    yyparse();
+    acabar_codi();
+
+    printf("El número d'estats és: %i\n", num_estats);
+    printf("L'estat inicial és: %i\n", estat_inicial);
+    printf("Els estats finals són: %i", estats_finals[0]);
+    for (int i=1 ; i < num_estats_finals; i++){
+        printf(", %i", estats_finals[i]);
+    }
+
+    printf ("\n%s", codi_afd);
+
+    //creem la llibreria
+    FILE* llibreria = fopen("af.h", "wa");
+    if (afd)
+        fprintf(llibreria, "int transicion (int estado, char simbolo);");
+    else
+        fprintf(llibreria, "int * transicion (int estado, char simbolo);");
+    fclose(llibreria);
+
+    FILE* funcio = fopen("af.c", "wa");
+    if (afd)
+        fprintf(funcio, "%s", codi_afd);
+    else
+        fprintf(funcio, "%s", codi_afn);
+    fclose(funcio);
+
+    return(1);
+}
+
 

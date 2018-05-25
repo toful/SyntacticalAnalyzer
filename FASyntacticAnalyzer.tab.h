@@ -34,7 +34,7 @@
 # define YY_YY_FASYNTACTICANALYZER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -46,23 +46,35 @@ extern int yydebug;
   enum yytokentype
   {
     ALFABET = 258,
-    ESTATS = 259,
-    TRANSICIONS = 260,
-    ESTAT_INICIAL = 261,
-    ESTATS_FINALS = 262,
-    COMENTARI = 263,
-    TRANSICIO = 264,
-    SIMBOL = 265,
-    COMA = 266,
-    OBRE = 267,
-    TANCA = 268,
-    NUMERO = 269
+    OBRE = 259,
+    TANCA = 260,
+    COMA = 261,
+    ESTATS = 262,
+    TRANSICIONS = 263,
+    ESTAT_INICIAL = 264,
+    ESTATS_FINALS = 265,
+    COMENTARI = 266,
+    OBRE_P = 267,
+    TANCA_P = 268,
+    SEPARADOR = 269,
+    SIMBOL = 270,
+    NUMERO = 271
   };
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 50 "FASyntacticAnalyzer.y" /* yacc.c:1909  */
+
+    char *stringut;
+
+#line 75 "FASyntacticAnalyzer.tab.h" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
